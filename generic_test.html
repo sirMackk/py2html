@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style type="text/css">
+body {
+background-color:#228B22;
+color:#000000;
+}
+/*style for main container*/
+#main_container {
+background-color:#FFFFFF;
+width:95%;
+height:auto;
+padding:25px;
+font-family:courier new;
+ }
+/*style for code containing divs*/
+.code {
+background-color:#FFFFFF;
+width:95%;
+height:auto;
+padding-left:25px;
+font-family:courier new;
+ }
+/*styles for code colors, using span*/
+/*test colors temporarily*/
+.ifdef {
+color:#0000CD;
+}
+
+.def {
+color:#FF00FF;
+}
+.int {
+color:#FF8C00;
+}
+.str {
+color:#A9A9A9;
+}
+.comment {
+color:#008000;
+}
+
+</style>
+</head>
+<body>
+<div id="main_container">
+    <span class="ifdef">class</span> board(object):<br />
+        
+        &nbsp&nbsp&nbsp&nbsp<span class="ifdef">def</span> <span class="def">__init__</span>(self):<br />
+            
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspself.Y_AXIS = <span class="int">15</span><br />
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspself.X_AXIS = <span class="int">25</span><br />
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspself.p_map = [[<span class="int">0</span> <span class="ifdef">for</span> i <span class="ifdef">in</span> range(self.Y_AXIS)] <span class="ifdef">for</span> i <span class="ifdef">in</span> range(self.X_AXIS)]<br />
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspself.c_map = [[<span class="int">0</span> <span class="ifdef">for</span> i <span class="ifdef">in</span> range(self.Y_AXIS)] <span class="ifdef">for</span> i <span class="ifdef">in</span> range(self.X_AXIS)]
+            <div class="code">
+            <span class="ifdef">def</span> <span class="def">__init__</span>(self):<br />
+            <div class="code">
+            self.Y_AXIS = <span class="int">15</span><br />
+            self.X_AXIS = <span class="int">25</span><br />
+            self.p_map = [[<span class="int">0</span> <span class="ifdef">for</span> i <span class="ifdef">in</span> range(self.Y_AXIS)] <span class="ifdef">for</span> i <span class="ifdef">in</span> range(self.X_AXIS)]<br />
+            self.c_map = [[<span class="int">0</span> <span class="ifdef">for</span> i <span class="ifdef">in</span> range(self.Y_AXIS)] <span class="ifdef">for</span> i <span class="ifdef">in</span> range(self.X_AXIS)]
+            </div></div>
+
+
+</div>
+
+</body>
+</html>
