@@ -2,25 +2,26 @@
 
 from sys import argv
 from re import search, split
-#gets file name from command line
+#html tag vars, will make this work better later
 ifdef = '<span class="ifdef">'
 integer = '<span class="int">'
 defi = '<span class="def">'
 stri = '<span class="str">'
+comment = '<span class="comm">'
+doc = '<span class="doc">'
 
 end_span = '</span>'
-flow_control = ['class', 'def', 'if', 'elif', 'else', 'while', 'for', 'return', 'from', 'import']
-blue_words = ['and', 'or', 'in', 'is']
+flow_control = ['class', 'if', 'elif', 'else', 'while', 'for', 'return', 'from', 'import']
+blue_words = ['and', 'or', 'in', 'is', 'import']
 #four_spaces = '&nbsp&nbsp&nbsp&nbsp'
    
     #re.split(r'(\s+)', stri, 1)
     #this seems to be a good way to get leading whitespace from strings to avoid using a loop
     #use ''.join(y) to join stuff back afterwards
-    
-#TODO:
-#Think of a way of parsing function calls like this:
-#product.append(white_rest[1]) for example. They at least need the integers colored
-  
+
+def build_header():
+    '''This function build the html header'''
+    pass
  
         
 def analyze(line):
@@ -36,32 +37,56 @@ def analyze(line):
         product.append(white_rest[1])
         #split string, get the first word, go through first_word function, append it
         #check if line is a comment, mark it green, else continue analysis
-        if white_rest[2][0] == '#':
-            product.append(is_comment(white_rest[2])
+        if white_rest[2][0] == '#' or white_rest[2][0:3] == '\'\'\'' or white_rest[2][-3:]:
+            product.append(is_comment_or_doc(white_rest[2]))
         else:
             #gets first word of the line, appends string
-            product.append(first_word(white_rest[2].split(' ', 1)[0]))
+            #update, if first word is def, it's gonna call different function
+            #to color func name pink
+            first_word = white_rest[2].split(' ', 1)
+            if first_word[0].lower() == 'def':
+                #under construction
+                product.append(first_word_def(first_word[1]))
+            else:
+                product.append(first_word(white_rest[2].split(' ', 1)[0]))
             #analyzes rest of line, appends a string
             product.append(rest_of_line(white_rest[2].split(' ', 1)[1]))
     #line != '', meaning no whitespace, so can take first word, analyze it
     #then take rest of line and analyze it
+    #UPDATE: gonna update this part of the function after I get most of stuff working
+    #because this is similar to the above flow block, except with different indices
     else:
-        if white_rest[0] == '#':
+        if white_rest[0] == '#' or white_rest[0:3] == '\'\'\'' or white_rest[2][-3:]:
             #appends a string, joins white_rest to feed is_comment with string
-            product.append(is_comment(''.join(white_rest)))
+            product.append(is_comment_or_doc(''.join(white_rest)))
         else:
             #analyze first word
+            if white_rest[0].lower() == 'def':
+                pass
             product.append(first_word(white_rest[0]))
             #analyze rest of line
             product.append(rest_of_line(white_rest[2]))    
 
     #this func returns a string of join list items prepared by previous functions
     return ''.join(product)
-def is_comment(line):
-    pass
+def is_comment_or_doc(line):
+    '''This function takes in a string and appends comment <span> tags to it
+    or if it's a __doc__ then it adds orange <span> tags'''
+    if line[0] == '#':
+        return '%s%s%s' % (comment, line, end_span)
+    else:
+        return '%s%s%s' % (doc, line, end_span)
+#REWRITE THIS FUNCTION USING REGEX SUB or REPLACE, MUCH EASIER, NICER AND MAYBE FASTER
+def first_word_def(rest):
+    first = '%s%s%s' % (ifdef, 'def ', end_span)
+    left = rest[1].split('(', 1)
+    first += '%s%s%s%s(%s%s)%s:' % (defi, left, end_span, ifdef, end_span, left[1].split(')', 1), ifdef, end_span)
+    return first
+    
 
 
 def first_word(word):
+
     '''This function uses string concatation to produce and return a flow control
     instruction enclosed in the right html tags or returns initial word if it's not 
     a flow control instruction'''
@@ -79,99 +104,35 @@ def first_word(word):
     #first gotta check if line ain't a comment
     
     if word in flow_control:
-        flow += ifdef
-        flow += word
-        flow += end_span
+        pass
+        
         
     return word
-def rest_of_line(words):
-    i = 0
-    work = words.split()
-    #main loop to skip over list of words, modify i sometimes
-    while i < range(len(work)):
-        
-#THIS FUNCTION IS BAD, left it only temporarily as an example        
-def rest(words):
-    '''This function will loop over every word left in search of and/or/in/other
-    and mark them blue. It will also check every word's first character for an " or ', if 
-    if finds it, it will call a string coloring function and insert the right
-    coloring into the list preceeding the string and then after it. It should also
-    color integers'''
-    #TODO : make sure that the insertion indices are correct, use !!!NOSE!!!
-    
-    #Ok, so the way this while loop works is that it loops through the items
-    #of a list of words. First it tries an item if it's an int - if True, 
-    #it inserts the html tags before and after the item (see: TODO).
-    
-    while i < range(len(words)):
-    #archaic for loop:
-    #for i in range(len(words)):
-        try:
-            int(words[i])
-            words.insert(i, integer)
-            words.insert((i+2), span_end)
-        #if it's not an integer, program will skip here.
-        #here, the program checks for quotes. If it finds a quote
-        #it places and html tag before it and goes into an inner loop to find 
-        #the end of the quote to place the closing tag, after which it adds length 
-        #of the string to the WHILE LOOP accumulator i so that i continues color-coding
-        #after the end of the string.
-        #TODO: Next, if its not an int or quote, it should look for a bunch of instructions
-        #like and/or/in/is and such and color them blue.
-        except ValueError:
-            #these ifs and for look for quotations
-            if words[i][0] == '\'' or words[i][0] == '"':
-            #this should place a span tag before every string
-                words.insert((i), stri)
-                #inner loop that looks for the end of a quote
-                for j in range(len(words)):
-                    if words[j][len((words[j]-1))] == '\'':
-                        words.insert((j+1), end_span)
-                        i += j
-                        break
-                    elif words[j][len((words[j]-1))] == '\"':
-                        words.insert((j+1), end_span)
-                        i += j
-                        break
-            #this else looks for blue instructions           
-            else:
-                if words[i] in blue_words:
-                    #add color tags to list of words
-                
-         i += 1   
-                
-               # closeString(words[i:len(words)])
-        #when the tag-enchanced list is ready, return it for joining
-        return words
-    
-            
-    
-def closeString(stringy):
-    for i in range(len(stringy)):
-            if stringy[i][len((stringy[i]-1))] == '\'' or stringy[i][len((stringy[i]-1))] == '\"':
-            #this should find end of all strings and place ending html tag
-                stringy.insert((i+1), end_span)        
-    
-    
+
+
+#commented these out so nose can run
+# def rest_of_line(words):
+    # i = 0
+    # work = words.split()
+   ## main loop to skip over list of words, modify i sometimes
+    # while i < range(len(work)):
+
     
     
 ############
 #MAIN LOOP
 ############  
 #do input verification here dude    
-script, filename = argv
+# script, filename = argv
 
 #opens file in memory
-input = open('%s.py' % filename)
-output = open('%s.html' % filename, 'w')
+# input = open('%s.py' % filename)
+# output = open('%s.html' % filename, 'w')
 #should write the header of the html file to the file
 #only after the main loop is done should it add the footer
 #file = input.readlines()
-for i in file:
-    output.write(first(i))
-
-
-
+# for i in file:
+    # output.write(first(i))
 #closes file
-input.close()
-output.close()
+# input.close()
+# output.close()
