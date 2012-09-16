@@ -29,25 +29,44 @@ def analyze(line):
     product = []
     #splits a line into whitespace [1] and rest of line
     white_rest = re.split(r'(\s+)', line, 1)
-    product.append(white_rest[1])
-    #this function will take the rest of line [2] and match the first word
-    #to flow control
-    #it splits the first word from the rest, this word [0] will be compared to flow control list
-    #then rest of line will be sent to next function
-    first = white_rest[2].split(' ', 1)
-    #YOU GOTTA SEE IF ITS A DEF, IF YES, GOTTA COLOR THE DEF NAME PINK
-    #flo function will decide on first word of line and return a formatted html string
-    product.append(flo(first[0]))
-    #rest function will take care of the rest of the line, after the first word
-    product.append(rest(first[1]))
-    #place for leading word comparison function
+
+    #white_rest[0] == '' when there is indent
+    if white_rest[0] == '':
+        #append white space to beginning of line
+        product.append(white_rest[1])
+        #split string, get the first word, go through first_word function, append it
+        #check if line is a comment, mark it green, else continue analysis
+        if white_rest[2][0] == '#':
+            product.append(is_comment(white_rest[2])
+        else:
+            #gets first word of the line, appends string
+            product.append(first_word(white_rest[2].split(' ', 1)[0]))
+            #analyzes rest of line, appends a string
+            product.append(rest_of_line(white_rest[2].split(' ', 1)[1]))
+    #line != '', meaning no whitespace, so can take first word, analyze it
+    #then take rest of line and analyze it
+    else:
+        if white_rest[0] == '#':
+            #appends a string, joins white_rest to feed is_comment with string
+            product.append(is_comment(''.join(white_rest)))
+        else:
+            #analyze first word
+            product.append(first_word(white_rest[0]))
+            #analyze rest of line
+            product.append(rest_of_line(white_rest[2]))    
 
     #this func returns a string of join list items prepared by previous functions
     return ''.join(product)
-def flo(word):
+def is_comment(line):
+    pass
+
+
+def first_word(word):
     '''This function uses string concatation to produce and return a flow control
     instruction enclosed in the right html tags or returns initial word if it's not 
     a flow control instruction'''
+    #first check if word is a comment
+    #then check for flow control words
     flow = ''
     ##one way to do this job
     # for i in flow_control:
@@ -56,13 +75,22 @@ def flo(word):
             # flow += word
             # flow += end_span
     #another way of doing this job:
+
+    #first gotta check if line ain't a comment
+    
     if word in flow_control:
         flow += ifdef
         flow += word
         flow += end_span
         
     return word
-    
+def rest_of_line(words):
+    i = 0
+    work = words.split()
+    #main loop to skip over list of words, modify i sometimes
+    while i < range(len(work)):
+        
+#THIS FUNCTION IS BAD, left it only temporarily as an example        
 def rest(words):
     '''This function will loop over every word left in search of and/or/in/other
     and mark them blue. It will also check every word's first character for an " or ', if 
