@@ -9,18 +9,18 @@ defi = '<span class="def">'
 stri = '<span class="str">'
 comment = '<span class="comm">'
 doc = '<span class="doc">'
+p_sisr = '<span class="ifdef">)</span>'
+p_sisl = '<span class="ifdef">(</span>'
+definition = '<span class="ifdef">def </span>'
+lb = '<br />'
 
 end_span = '</span>'
-flow_control = ['class', 'if', 'elif', 'else', 'while', 'for', 'return', 'from', 'import']
+flow_control = ['class', 'if', 'elif', 'else', 'while', 'for', 'return', 'from', 'import', 'print']
 blue_words = ['and', 'or', 'in', 'is', 'import']
-#four_spaces = '&nbsp&nbsp&nbsp&nbsp'
-   
-    #re.split(r'(\s+)', stri, 1)
-    #this seems to be a good way to get leading whitespace from strings to avoid using a loop
-    #use ''.join(y) to join stuff back afterwards
+#TODO: Later on, check if whitespace is parsed properly by browser, if not, than add &nbsp
 
 def build_header():
-    '''This function build the html header'''
+    '''This function builds the html header'''
     pass
  
         
@@ -41,16 +41,19 @@ def analyze(line):
             product.append(is_comment_or_doc(white_rest[2]))
         else:
             #gets first word of the line, appends string
-            #update, if first word is def, it's gonna call different function
-            #to color func name pink
             first_word = white_rest[2].split(' ', 1)
+            #different case if the word is def
             if first_word[0].lower() == 'def':
-                #under construction
                 product.append(first_word_def(first_word[1]))
             else:
-                product.append(first_word(white_rest[2].split(' ', 1)[0]))
-            #analyzes rest of line, appends a string
-            product.append(rest_of_line(white_rest[2].split(' ', 1)[1]))
+                product.append(first_word(first_word[0]))
+                #analyzes rest of line, appends a string
+                product.append(rest_of_line(first_word[1]))
+
+    elif len(white_rest) == 1:
+        #if white_rest is a single entry, means it can only have blue parenthesis
+        #or grey strings or orange ints
+        product.append(find_ints(find_strings(white_rest)))
     #line != '', meaning no whitespace, so can take first word, analyze it
     #then take rest of line and analyze it
     #UPDATE: gonna update this part of the function after I get most of stuff working
@@ -73,15 +76,15 @@ def is_comment_or_doc(line):
     '''This function takes in a string and appends comment <span> tags to it
     or if it's a __doc__ then it adds orange <span> tags'''
     if line[0] == '#':
-        return '%s%s%s' % (comment, line, end_span)
+        return '%s%s%s%s' % (comment, line, end_span, lb)
     else:
-        return '%s%s%s' % (doc, line, end_span)
-#REWRITE THIS FUNCTION USING REGEX SUB or REPLACE, MUCH EASIER, NICER AND MAYBE FASTER
+        return '%s%s%s%s' % (doc, line, end_span, lb)
+
 def first_word_def(rest):
-    first = '%s%s%s' % (ifdef, 'def ', end_span)
-    left = rest[1].split('(', 1)
-    first += '%s%s%s%s(%s%s)%s:' % (defi, left, end_span, ifdef, end_span, left[1].split(')', 1), ifdef, end_span)
-    return first
+    '''This function returns an html formatted string if the first word
+    is "def". It makes the name of the function a different color.'''
+    
+    return definition + defi + rest[:rest.index('(')] + end_span + p_sisl + rest[(rest.index('(')+1):rest.index(')')] + p_sisr + rest[-1] + lb
     
 
 
@@ -90,33 +93,24 @@ def first_word(word):
     '''This function uses string concatation to produce and return a flow control
     instruction enclosed in the right html tags or returns initial word if it's not 
     a flow control instruction'''
-    #first check if word is a comment
-    #then check for flow control words
-    flow = ''
-    ##one way to do this job
-    # for i in flow_control:
-        # if word == i.lower():
-            # flow += ifdef
-            # flow += word
-            # flow += end_span
-    #another way of doing this job:
-
-    #first gotta check if line ain't a comment
-    
+  
     if word in flow_control:
+        return ifdef + word + ' ' + end_span
+    else:           
+        return word
+
+
+#work on this next
+def rest_of_line(words):
+    #It seems the best course of action would be to create two more functions:
+    #find_strings and find_ints, that would cycle over a string and insert tags 
+    #in the right places. After that, rest_of_line would split the string and look for 
+    #blue words, tag them and return ''.join them
+    i = 0
+    work = words.split()
+   # main loop to skip over list of words, modify i sometimes
+    while i < range(len(work)):
         pass
-        
-        
-    return word
-
-
-#commented these out so nose can run
-# def rest_of_line(words):
-    # i = 0
-    # work = words.split()
-   ## main loop to skip over list of words, modify i sometimes
-    # while i < range(len(work)):
-
     
     
 ############
