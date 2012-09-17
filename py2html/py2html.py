@@ -111,6 +111,29 @@ def rest_of_line(words):
    # main loop to skip over list of words, modify i sometimes
     while i < range(len(work)):
         pass
+
+def find_strings(words):
+    list_1 = [i for i, a in enumerate(words) if a == '\'']
+    i = 0
+    words_out = ''
+    #this will iterate over list_1, so i is it's index
+    while i < len(list_1):
+        words_out += words[:list_1[i]] + comment
+        j = 1
+        while j < len(list_1)-1:
+            print i, j
+            if list_1[i]+j == list_1[(i+j)]:
+                j += 1
+            else:
+                #this will close the tag
+                words_out += words[list_1[i]:list_1[(i+j)]] + end_span 
+                i += j
+                break
+        
+
+
+
+    return words_out
     
     
 ############

@@ -34,3 +34,19 @@ def test_first_word2():
 
         word_equal = '%s' % i
         assert_equal(first_word(i), word_equal)
+
+
+def test_find_strings1():
+    string_test = "if x == 'yes':"
+    string_test_equal = 'if x == <span class="comm">\'yes\'</span>:'
+    
+    assert_equal(find_strings(string_test), string_test_equal)
+
+def test_find_strings2():
+    string_test = "if x == 'yes' or y == 'no':"
+    string_test_equal = 'if x == <span class="comm">\'yes\'</span> or y == <span class="comm">\'no\'</span>:'
+    
+    assert_equal(find_strings(string_test), string_test_equal)
+
+   
+
