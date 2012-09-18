@@ -113,27 +113,36 @@ def rest_of_line(words):
         pass
 
 def find_strings(words):
-    list_1 = [i for i, a in enumerate(words) if a == '\'']
-    i = 0
-    words_out = ''
-    #this will iterate over list_1, so i is it's index
-    while i < len(list_1):
-        words_out += words[:list_1[i]] + comment
-        j = 1
-        while j < len(list_1)-1:
-            print i, j
-            if list_1[i]+j == list_1[(i+j)]:
-                j += 1
-            else:
-                #this will close the tag
-                words_out += words[list_1[i]:list_1[(i+j)]] + end_span 
-                i += j
-                break
+#THIS SOLUTION WAS SUGGESTED ON STACKOVERFLOW,
+#Played around with tokens for the past hour, this seems like the ideal solution
+#and as far as I'm aware, it's used in a bunch of other python parsers. 
+#Also, shows the importance of knowing generators and some other cool stuff.
+#Going to work on this code, probably rework the rest of this script to incorporate, as it seems much more efficient than what I've written before, plus less convoluted at the same time.
+#Check out this topics online: io.bytesio vs stringio, generators, tokens, tokenizers
+#Look for an intermediate book on python, might help in learning that functions such as
+#tokenizer even exist.
+
+
+# import tokenize
+# import token
+# import io
+
+# text = '''
+# x = 'hello there'  
+# if x == 'example "quotes" inside quotes' and y == 'another example': pass
+# '''
+
+
+# tokens = tokenize.generate_tokens(io.BytesIO(text).readline)
+# for toknum, tokval, (srow, scol), (erow, ecol), line in tokens:
+    # tokname = token.tok_name[toknum]
+    # print(tokname, tokval)
+
         
 
 
 
-    return words_out
+    # return words_out
     
     
 ############
