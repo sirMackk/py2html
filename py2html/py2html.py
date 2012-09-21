@@ -7,13 +7,13 @@ import tokenize
 import token
 import keyword
 
-html = {ifdef: '<span class="ifdef">', 
-        number: '<span class="int">',
-        definition: '<span class="def">'
-        string: '<span class="str">',
-        comment: '<span class="comm">',
-        lb = '<br />'
-        end_span = '<br />'}
+html = {'ifdef': '<span class="ifdef">', 
+        'number': '<span class="int">',
+        'definition': '<span class="def">'
+        'string': '<span class="str">',
+        'comment:' '<span class="comm">',
+        'lb' = '<br />'
+        'end_span' = '<br />'}
 #example header, later must add modifieable colors
 header = '''<!DOCTYPE html>
 <html>
@@ -93,4 +93,40 @@ trailer = '''</body>
     # print(tokname, tokval)
 
 class PythonParse(object):
+
+    def __init__(self, input, output):
+        #input and output will be file objects?
+        self._input = input
+        self._output = output  
+        self._tokens = []
+        
+        #gonna call get_tokens and analyze here, perfect place
     
+    def get_tokens(self):
+        '''This function will tokenize self._input and append self._tokens with a list of tuples'''
+        tokens = tokenize.generate_tokens(self._input.realine)
+        for toknum, tokval, (srow, scol), (erow, ecol), line in tokens:
+            tokname = token.tok_name[toknum]
+            self._tokens.append((tokname, tokval))
+            
+        
+    def analyze(self):
+        '''This method will accept a list of token pairs from get_tokens
+        and it's gonna analyze it, add the appropriate html tags, and add it to 
+        the _output object'''
+        #single loop to go over token types, decide on type what to do
+        for item in _self.tokens:
+            if item[0] == 'NAME':
+                #call check name func
+                pass
+            elif item[0] == 'OP' and item[1] == '(' or item[1] == ')':
+                #call parenthesis color func
+                pass
+            elif item[0] == 'NUMBER':
+                self.output.write('%sitem[1]%s' % (html['number'], html['end_span']))
+            #continue this for rest of token types
+            
+       
+        
+    def get_html(self):
+        pass
