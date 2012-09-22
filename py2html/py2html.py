@@ -1,9 +1,11 @@
 #!/usr/bin/python
 
 from sys import argv
+from string import expandtabs
 import tokenize
 import token
 import keyword
+import cgi
 
 
 
@@ -54,19 +56,12 @@ color:#008000;
 </style>
 </head>
 <body>
+<div id="main_container">
 '''
 
-trailer = '''</body>
+trailer = '''</div></body>
 </html>'''
 
-
-        
-#string.expandtabs()
-
-#NEW PLAN:
-
-#Use the method below to read the .py file into memory using file.readline. Tokenize it (try/except?), return a list of tokens, then use the keyword module to color words blue, numbers orange etc.  Allow the program to read in .inf/.conf file for easy color adjustments.
-#Easy, right?
 
 
 
@@ -78,17 +73,22 @@ class PythonParse(object):
         self._scan = {
         'NAME' : self.check_kywrd,
         'OP': self.check_op,
+        'NUMBER': self.number,
         'STRING': self.str_fmt,
         'COMMENT': self.cmt_fmt,
         'NEWLINE': self.new_line,
-        #error here, dict cannot contain string values
-        'INDENT': '',
+        'INDENT': self.indent,
         'NL': self.new_line,
-        'DEDENT': '',
-        'ENDMARKER': '',
+        'DEDENT': self.deindent,
+        'ENDMARKER': self.deindent,
         }
+        self._ops = ['=', '+', '-', '*', '//', '%',
+                '**', '////', '==', '+=', '-=', '*=', '//=',
+                '%=', '**=', '////=', '!=', '<>', '>', '<',
+                '>=', '<=']
+        self.indent = ''
         self._input = open(input)
-        self._output = open('%s.html' % input, 'w')  
+        self._output = open('%s.html' % input, 'w')
         self._tokens = []
         self.get_tokens()
         self._input.close()
@@ -96,10 +96,7 @@ class PythonParse(object):
         self.analyze()
         self._output.write(trailer)
         self._output.close()
-        
-        
-        
-        #gonna call get_tokens and analyze here, perfect place
+
     
     def get_tokens(self):
         '''This function will tokenize self._input and append self._tokens with a list of tuples'''
@@ -117,29 +114,45 @@ class PythonParse(object):
         
         for item in self._tokens:
             
-            self._output.write(self._scan[item[0]](item[1]))       
+            self._output.write(self._scan[item[0]](item[1]))
         
         
     def check_kywrd(self, word):
         if keyword.iskeyword(word):
             return '<span class="ifdef"> ' + word + ' </span>'
         else:
-            return ' ' + word
+            return word
             
     def check_op(self, op):
         if op == '(' or op == ')':
             return '<span class="ifdef">' + op + '</span>'
+        elif op == ',':
+            return op + ' '
+        elif op in self._ops:
+            return ' ' + op + ' '
         else:
             return op
             
     def str_fmt(self, str):
-        return '<span class="str"> ' + str + '</span>'
+        return '<span class="str"> ' + cgi.escape(str) + '</span>'
      
     def cmt_fmt(self, cmt):
         return '<span class="comm"> ' + cmt + '</span>'
     
     def new_line(self, nl):
         return '<br />\n'
+
+    def indent(self, ind):
+        self.indent += ('&nbsp' * len(ind.expandtabs(4)))
+        return ''
+
+    def deindent(self, ind):
+        self.indent = ''
+        return ''
+
+    def number(self, num):
+        return '<span class="int">' + num + '</span>'
+
         
 script, name = argv
 #length check for argv later
