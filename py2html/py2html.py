@@ -69,7 +69,7 @@ class PythonParse(object):
 
 
     def __init__(self, input):
-        #TODO: check whitespace when putting string back together
+        #TODO: whitespace isn't good. Idea: change tokens so they include the whole line, take white space before line and .write it to file, then second loop to handle tokens build rest of line, when \n, outer loop incs by one. This might work, plus it will reduce the number of functions, I can use an if-elif-else block instead.
         self._scan = {
         'NAME' : self.check_kywrd,
         'OP': self.check_op,
@@ -86,6 +86,7 @@ class PythonParse(object):
                 '**', '////', '==', '+=', '-=', '*=', '//=',
                 '%=', '**=', '////=', '!=', '<>', '>', '<',
                 '>=', '<=']
+
         self.indent = ''
         self._input = open(input)
         self._output = open('%s.html' % input, 'w')
@@ -112,9 +113,9 @@ class PythonParse(object):
         and it's gonna analyze it, add the appropriate html tags, and add it to 
         the _output object'''
         
-        for item in self._tokens:
-            
-            self._output.write(self._scan[item[0]](item[1]))
+        for i in xrange(len(self._tokens)):
+
+            self._output.write(self._scan[self._tokens[i][0]](self._tokens[i][1]))
         
         
     def check_kywrd(self, word):
@@ -137,10 +138,10 @@ class PythonParse(object):
         return '<span class="str"> ' + cgi.escape(str) + '</span>'
      
     def cmt_fmt(self, cmt):
-        return '<span class="comm"> ' + cmt + '</span>'
+        return '<span class="comm">' + cmt + '</span>'
     
     def new_line(self, nl):
-        return '<br />\n'
+        return '<br />\n' + self.indent
 
     def indent(self, ind):
         self.indent += ('&nbsp' * len(ind.expandtabs(4)))
