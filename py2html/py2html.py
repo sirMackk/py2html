@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 from sys import argv
-from string import expandtabs
 import tokenize
 import token
 import keyword
@@ -56,47 +55,34 @@ color:#008000;
 </style>
 </head>
 <body>
-<div id="main_container">
+<div id="main_container"><pre>
 '''
 
-trailer = '''</div></body>
+trailer = '''</pre></div></body>
 </html>'''
 
 
 
 
 class PythonParse(object):
-
+#TODO: Fix white space between words
+#TODO: Make colors global vars, easier to modify
+#TODO: Fix __docs__
 
     def __init__(self, input):
-        #TODO: whitespace isn't good. Idea: change tokens so they include the whole line, take white space before line and .write it to file, then second loop to handle tokens build rest of line, when \n, outer loop incs by one. This might work, plus it will reduce the number of functions, I can use an if-elif-else block instead.
-        self._scan = {
-        'NAME' : self.check_kywrd,
-        'OP': self.check_op,
-        'NUMBER': self.number,
-        'STRING': self.str_fmt,
-        'COMMENT': self.cmt_fmt,
-        'NEWLINE': self.new_line,
-        'INDENT': self.indent,
-        'NL': self.new_line,
-        'DEDENT': self.deindent,
-        'ENDMARKER': self.deindent,
-        }
-        self._ops = ['=', '+', '-', '*', '//', '%',
-                '**', '////', '==', '+=', '-=', '*=', '//=',
-                '%=', '**=', '////=', '!=', '<>', '>', '<',
-                '>=', '<=']
+        #This dict might be handy
+        #self._ops = ['=', '+', '-', '*', '//', '%',
+               # '**', '////', '==', '+=', '-=', '*=', '//=',
+                #'%=', '**=', '////=', '!=', '<>', '>', '<',
+                #'>=', '<=']
+        
 
         self.indent = ''
         self._input = open(input)
-        self._output = open('%s.html' % input, 'w')
-        self._tokens = []
-        self.get_tokens()
-        self._input.close()
+        self._output = open('%s.html' % input[:-3], 'w')
         self._output.write(header)
         self.analyze()
-        self._output.write(trailer)
-        self._output.close()
+
 
     
     def get_tokens(self):
@@ -112,49 +98,45 @@ class PythonParse(object):
         '''This method will accept a list of token pairs from get_tokens
         and it's gonna analyze it, add the appropriate html tags, and add it to 
         the _output object'''
-        
-        for i in xrange(len(self._tokens)):
+        tokens = tokenize.generate_tokens(self._input.readline)
+        for toknum, tokval, (srow, scol), (erow, ecol), line in tokens:
+            tokname = token.tok_name[toknum]
+            if tokname == 'NEWLINE' or tokname == 'NL':
+                self._output.write('\n%s' % self.indent)
+            elif tokname == 'INDENT':
+                self._output.write('    ')
+                self.indent += '    '
+                
+            elif tokname == 'DEDENT':
+                
+                self._output.seek(-4, 1)
+                self.indent = self.indent[:-4]
 
-            self._output.write(self._scan[self._tokens[i][0]](self._tokens[i][1]))
-        
-        
-    def check_kywrd(self, word):
-        if keyword.iskeyword(word):
-            return '<span class="ifdef"> ' + word + ' </span>'
-        else:
-            return word
+            elif keyword.iskeyword(tokval) or tokval == '(' or tokval == ')':
+                self._output.write('<span class="%s">%s</span>' % ('ifdef', tokval))
+
+           # '<span class"%s">%s</span>' % (colors[tokname], tokval)
+               
+
+            elif tokname == 'NAME' or tokname == 'OP':
+
+                self._output.write(tokval)
+                            
             
-    def check_op(self, op):
-        if op == '(' or op == ')':
-            return '<span class="ifdef">' + op + '</span>'
-        elif op == ',':
-            return op + ' '
-        elif op in self._ops:
-            return ' ' + op + ' '
-        else:
-            return op
-            
-    def str_fmt(self, str):
-        return '<span class="str"> ' + cgi.escape(str) + '</span>'
+            elif tokname == 'NUMBER':
+                self._output.write('<span class="%s">%s</span>' % ('int', tokval))
+
+            elif tokname == 'STRING':
+                self._output.write('<span class="%s">%s</span>' % ('str', cgi.escape(tokval)))                
+
+            elif tokname == 'COMMENT':
+                self._output.write('<span class="%s">%s</span>' % ('comm', tokval))  
+            #tokname == endmarker case
+            else:
+                self._output.write(trailer)
+                self._input.close()
+                self._output.close()
      
-    def cmt_fmt(self, cmt):
-        return '<span class="comm">' + cmt + '</span>'
-    
-    def new_line(self, nl):
-        return '<br />\n' + self.indent
-
-    def indent(self, ind):
-        self.indent += ('&nbsp' * len(ind.expandtabs(4)))
-        return ''
-
-    def deindent(self, ind):
-        self.indent = ''
-        return ''
-
-    def number(self, num):
-        return '<span class="int">' + num + '</span>'
-
-        
 script, name = argv
 #length check for argv later
 
