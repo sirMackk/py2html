@@ -1,15 +1,25 @@
-#!/usr/bin/python
+# PythonParse
 
 from sys import argv
-import tokenize
-import token
-import keyword
-import cgi
+from tokenize import generate_tokens
+from token import tok_name
+from keyword import iskeyword
+from cgi import escape
 
 
 
 #example header, later must add modifieable colors
-header = '''<!DOCTYPE html>
+
+
+
+
+class PythonParse(object):
+
+#TODO: Make colors global vars, easier to modify
+#TODO: Fix __docs__
+
+    def __init__(self, input):  
+        header = '''<!DOCTYPE html>
 <html>
 <head>
 <style type="text/css">
@@ -24,7 +34,7 @@ width:95%;
 height:auto;
 padding:25px;
 font-family:courier new;
- }
+}
 /*style for code containing divs*/
 .code {
 background-color:#FFFFFF;
@@ -32,7 +42,7 @@ width:95%;
 height:auto;
 padding-left:25px;
 font-family:courier new;
- }
+}
 /*styles for code colors, using span*/
 /*test colors temporarily*/
 .ifdef {
@@ -55,52 +65,34 @@ color:#008000;
 </style>
 </head>
 <body>
-<div id="main_container"><pre>
-'''
+<div id="main_container"><pre>'''
 
-trailer = '''</pre></div></body>
-</html>'''
-
-
-
-
-class PythonParse(object):
-#TODO: Fix white space between words
-#TODO: Make colors global vars, easier to modify
-#TODO: Fix __docs__
-
-    def __init__(self, input):
-        #This dict might be handy
-        #self._ops = ['=', '+', '-', '*', '//', '%',
-               # '**', '////', '==', '+=', '-=', '*=', '//=',
-                #'%=', '**=', '////=', '!=', '<>', '>', '<',
-                #'>=', '<=']
-        
+        self.trailer = '''</pre></div></body>
+                </html>'''
 
         self.indent = ''
         self._input = open(input)
         self._output = open('%s.html' % input[:-3], 'w')
         self._output.write(header)
         self.analyze()
-
-
-    
-    def get_tokens(self):
-        '''This function will tokenize self._input and append self._tokens with a list of tuples'''
-        tokens = tokenize.generate_tokens(self._input.readline)
-        for toknum, tokval, (srow, scol), (erow, ecol), line in tokens:
-            tokname = token.tok_name[toknum]
-            #print (tokname, tokval)
-            self._tokens.append((tokname, tokval))
-            
+        self._input.close()
+        self._output.close()
         
     def analyze(self):
         '''This method will accept a list of token pairs from get_tokens
         and it's gonna analyze it, add the appropriate html tags, and add it to 
         the _output object'''
-        tokens = tokenize.generate_tokens(self._input.readline)
+        function = False
+        tokens = generate_tokens(self._input.readline)
         for toknum, tokval, (srow, scol), (erow, ecol), line in tokens:
-            tokname = token.tok_name[toknum]
+            out = ''
+            space = ''
+
+            if ecol <= len(line)-2:
+                if line[ecol] == ' ':
+                    space = ' '
+
+            tokname = tok_name[toknum]
             if tokname == 'NEWLINE' or tokname == 'NL':
                 self._output.write('\n%s' % self.indent)
             elif tokname == 'INDENT':
@@ -112,30 +104,36 @@ class PythonParse(object):
                 self._output.seek(-4, 1)
                 self.indent = self.indent[:-4]
 
-            elif keyword.iskeyword(tokval) or tokval == '(' or tokval == ')':
-                self._output.write('<span class="%s">%s</span>' % ('ifdef', tokval))
-
-           # '<span class"%s">%s</span>' % (colors[tokname], tokval)
-               
+            elif iskeyword(tokval) or tokval == '(' or tokval == ')':
+                if tokval.lower() == 'def':
+                    function = True
+                out = '<span class="%s"><b>%s</b></span>' % ('ifdef', tokval)
 
             elif tokname == 'NAME' or tokname == 'OP':
-
-                self._output.write(tokval)
-                            
-            
+                if function == True:
+                    out = '<span class="%s"><b>%s</b></span>' % ('def', tokval)
+                    function = False
+                else:
+                    out = tokval
+                                     
             elif tokname == 'NUMBER':
-                self._output.write('<span class="%s">%s</span>' % ('int', tokval))
+                out = '<span class="%s"><b>%s</b></span>' % ('int', tokval)
 
             elif tokname == 'STRING':
-                self._output.write('<span class="%s">%s</span>' % ('str', cgi.escape(tokval)))                
-
+                if tokval[:3] == '\'\'\'':
+                    out = '<span class="%s"><b>%s</b></span>' % ('int', escape(tokval))
+                else:
+                    out = '<span class="%s">%s</span>' % ('str', escape(tokval))
+              
             elif tokname == 'COMMENT':
-                self._output.write('<span class="%s">%s</span>' % ('comm', tokval))  
-            #tokname == endmarker case
+                out = '<span class="%s"><b>%s</b></span>' % ('comm', escape(tokval))
+
             else:
-                self._output.write(trailer)
-                self._input.close()
-                self._output.close()
+                self._output.write(out)
+                self._output.write(self.trailer)
+
+            self._output.write('%s%s' % (out, space))
+
      
 script, name = argv
 #length check for argv later
