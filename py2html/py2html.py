@@ -11,10 +11,19 @@ class PythonParse(object):
 
 #TODO: Make colors global vars, easier to modify
 #TODO: Improve html structure a bit
+#TODO: Test out the return of get_code func
 
 
-    def __init__(self, input):  
-
+    def __init__(self, input, cli, nums):  
+    '''
+    The class does most of the work automatically though the constructor. 
+    The user is mostly interested in passing the correct parameters to the object.
+    The first parameter is the name of a python source code file. The second parameter
+    is either True/False and indicates whether html tags should use inline styles (false)
+    or a an internal style sheet (true). If returning an html file, True is recommended.
+    The final parameter 'nums' is an option to number the lines in the output, although
+    this is just a small extra and doesn't format the text as nicely.
+    '''
 
         self._header = '''<!DOCTYPE html>
 <html><head>
@@ -65,30 +74,56 @@ color:#008000;
 
         self._trailer = '''</pre></div></body>
                 </html>''' 
+        
+
+        if cli:
+            self._style = {'def': '<span class="def">',
+                            'int': '<span class="int">',
+                            'str': '<span class="str">',
+                            'comm': '<span class="comm">',
+                            'ifdef': '<span class="ifdef">'}
+        else:
+            self._style = {'def': '<span style="color:#FF00FF;">',
+                'int': '<span style="color:#FF8C00;">',
+                'str': '<span style="color:#A9A9A9;">',
+                'comm': '<span style="color:#008000;">',
+                'ifdef': '<span style="color:#0000CD;">'}
+        
         self.name = input
-        self.indent = ''
+        self._indent = ''
         try:
             self._input = open(input)
         except IOError:
             print '%s - file does not exist' % input
             exit()
 
-        #out = open('%s.html' % input[:-3], 'w')
         self._output = StringIO()
-        #self._output.write(header)
         self.analyze()
-        self.number_lines()
+        if nums:
+            self.number_lines()
 
 
     def __del__(self):
+        '''
+        Destructor, will close all file/cStringIO objects
+        '''
         self._input.close()
         self._output.close()
 
     def get_code(self):
-        #returns copy of _output
+        '''
+        This function returns a copy of a cStringIO object of the formatted output.
+        Useful if ParsePython is used in web-dev
+        '''
+        
         return StringIO(self._output.getvalue())
 
     def write_out(self):
+        '''
+        This functions tries to open a file for writing, writes the header,
+        the html formatted source code and the trailer and closes the file.
+        Use this to get .html file output.
+        '''
         try:
             write_out = open('%s.html' % self.name[:-3], 'w')
         except IOError:
@@ -100,6 +135,9 @@ color:#008000;
         write_out.close()
 
     def number_lines(self):
+        '''Function for numbering the lines of an already formatted
+        cStringIO object.
+        '''
         temp = StringIO()
         i = 0
         for line in self.get_code():
@@ -107,15 +145,13 @@ color:#008000;
             i += 1
             
         self._output = temp
-            
-            
-
-    
-        
+                   
     def analyze(self):
-        '''This function used the input object to iterate through it using the
-            generate_tokens function from the tokenize module and to pad everything
-            with the appropriate whitespace and html tags'''
+        '''
+        This function used the input object to iterate through it using the
+        generate_tokens function from the tokenize module and to pad everything
+        with the appropriate whitespace and html tags
+        '''
         function = False
         tokens = generate_tokens(self._input.readline)
         for toknum, tokval, (srow, scol), (erow, ecol), line in tokens:
@@ -128,43 +164,42 @@ color:#008000;
 
             tokname = tok_name[toknum]
             if tokname == 'NEWLINE' or tokname == 'NL':
-                self._output.write('\n%s' % self.indent)
+                self._output.write('\n%s' % self._indent)
             elif tokname == 'INDENT':
                 self._output.write('    ')
-                self.indent += '    '
+                self._indent += '    '
                 
             elif tokname == 'DEDENT':
                 
                 self._output.seek(-4, 1)
-                self.indent = self.indent[:-4]
+                self._indent = self._indent[:-4]
 
             elif iskeyword(tokval) or tokval == '(' or tokval == ')':
                 if tokval.lower() == 'def':
                     function = True
-                out = '<span class="%s"><b>%s</b></span>' % ('ifdef', tokval)
+                out = '%s<b>%s</b></span>' % (self._style['ifdef'], tokval)
 
             elif tokname == 'NAME' or tokname == 'OP':
                 if function == True:
-                    out = '<span class="%s"><b>%s</b></span>' % ('def', tokval)
+                    out = '%s<b>%s</b></span>' % (self._style['def'], tokval)
                     function = False
                 else:
                     out = tokval
                                      
             elif tokname == 'NUMBER':
-                out = '<span class="%s"><b>%s</b></span>' % ('int', tokval)
+                out = '%s<b>%s</b></span>' % (self._style['int'], tokval)
 
             elif tokname == 'STRING':
                 if tokval[:3] == '\'\'\'':
-                    out = '<span class="%s"><b>%s</b></span>' % ('int', escape(tokval))
+                    out = '%s<b>%s</b></span>' % (self._style['int'], escape(tokval))
                 else:
-                    out = '<span class="%s">%s</span>' % ('str', escape(tokval))
+                    out = '%s%s</span>' % (self._style['str'], escape(tokval))
               
             elif tokname == 'COMMENT':
-                out = '<span class="%s"><b>%s</b></span>' % ('comm', escape(tokval))
+                out = '%s<b>%s</b></span>' % (self._style['comm'], escape(tokval))
 
             else:
                 self._output.write(out)
-                #self._output.write(self.trailer)
 
             self._output.write('%s%s' % (out, space))
 
@@ -175,5 +210,5 @@ except ValueError:
     print "Correct input has form - 'py2html.py name_of_file.py'"
     exit()   
 
-parsed = PythonParse(name)
+parsed = PythonParse(name, True, True)
 parsed.write_out()
