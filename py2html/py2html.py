@@ -15,15 +15,15 @@ class PythonParse(object):
 
 
     def __init__(self, input, cli, nums):  
-    '''
-    The class does most of the work automatically though the constructor. 
-    The user is mostly interested in passing the correct parameters to the object.
-    The first parameter is the name of a python source code file. The second parameter
-    is either True/False and indicates whether html tags should use inline styles (false)
-    or a an internal style sheet (true). If returning an html file, True is recommended.
-    The final parameter 'nums' is an option to number the lines in the output, although
-    this is just a small extra and doesn't format the text as nicely.
-    '''
+        '''
+        The class does most of the work automatically though the constructor. 
+        The user is mostly interested in passing the correct parameters to the object.
+        The first parameter is the name of a python source code file. The second parameter
+        is either True/False and indicates whether html tags should use inline styles (false)
+        or a an internal style sheet (true). If returning an html file, True is recommended.
+        The final parameter 'nums' is an option to number the lines in the output, although
+        this is just a small extra and doesn't format the text as nicely.
+        '''
 
         self._header = '''<!DOCTYPE html>
 <html><head>
