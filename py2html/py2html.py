@@ -9,7 +9,6 @@ from cStringIO import StringIO
 
 class PythonParse(object):
 
-#TODO: Test out the return of get_code func
 
 
     def __init__(self, input, cli, nums):  
@@ -22,7 +21,7 @@ class PythonParse(object):
         The final parameter 'nums' is an option to number the lines in the output, although
         this is just a small extra and doesn't format the text as nicely.
         '''
-        _version = 'version 0.18'
+        _version = 'version 0.2'
 
         #Global color vars. Changing them will change the output colors.
         _colors = {'keyword': '0000CD', 'definition': 'FF00FF', 
@@ -75,7 +74,7 @@ font-family:courier new;
                             'comm': '<span class="comm">',
                             'ifdef': '<span class="ifdef">'}
         else:
-            self._style = {'def': '<span style="color:#%s;">' % _colors['definiation'],
+            self._style = {'def': '<span style="color:#%s;">' % _colors['definition'],
                 'int': '<span style="color:#%s;">' % _colors['numbers'],
                 'str': '<span style="color:#%s;">' % _colors['strings'],
                 'comm': '<span style="color:#%s;">' % _colors['comments'],
@@ -112,7 +111,7 @@ font-family:courier new;
         Useful if ParsePython is used in web-dev
         '''
         
-        return StringIO(self._output.getvalue())
+        return '<pre>' + self._output.getvalue() + '</pre>'
 
     def write_out(self):
         '''
@@ -213,3 +212,5 @@ except ValueError:
 
 parsed = PythonParse(name, True, False)
 parsed.write_out()
+
+

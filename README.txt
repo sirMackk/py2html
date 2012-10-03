@@ -24,3 +24,8 @@ File I/O was the easiest part of this project, although I did learn a good deal 
 
 I was not able to write any tests, since the class only uses one constructor function and one general function, which doesn't even return a value. I believe this is also acceptable for such a small ~140 line project. 
 
+Debriefing for version 0.2:
+
+Th project grew by about 70 lines. This includes giving the class the possibility to return the tagged code without any headers, ideal for embedding in web pages. This might come in mighty handy in a few months. However, I have not had the chance to test this functionality in the wild.
+
+I still have to research how to make my code easier to read and a bit more about best practices, although I see a big improvement since my previous project. There is still more learning to be done.
