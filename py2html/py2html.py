@@ -203,14 +203,16 @@ font-family:courier new;
 
             self._output.write('%s%s' % (out, space))
 
-try:     
-    script, name = argv
-except ValueError:
-    print "Incorrect input"
-    print "Correct input has form - 'py2html.py name_of_file.py'"
-    exit()   
 
-parsed = PythonParse(name, True, False)
-parsed.write_out()
+if __name__ == '__main__':
+    try:     
+        script, name = argv
+    except ValueError:
+        print "Incorrect input"
+        print "Correct input has form - 'py2html.py name_of_file.py'"
+        exit()   
+
+    parsed = PythonParse(name, True, False)
+    parsed.write_out()
 
 
